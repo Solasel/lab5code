@@ -21,6 +21,8 @@ void __attribute__((noinline)) vvadd_opt(int coreid, int ncores, size_t n, const
 {
 	size_t i;
 
+	/* Each core does 16 units of work at a time = 2 cache lines.
+	 * This ensures no false sharing and also functions as loop unrolling. */
 	for (i = 16*coreid; i < (n/32)*32; i += 32) {
 		z[i] = x[i] + y[i];
 		z[i+1] = x[i+1] + y[i+1];
@@ -40,6 +42,7 @@ void __attribute__((noinline)) vvadd_opt(int coreid, int ncores, size_t n, const
 		z[i+15] = x[i+15] + y[i+15];
 	}
 
+	/* Tail case */
 	if (coreid == 0) {
 		for (i = (n/32)*32; i < n; i++) {
 			z[i] = x[i] + y[i];
